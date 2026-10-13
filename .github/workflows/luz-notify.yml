@@ -1,0 +1,52 @@
+# שרת ההתראות של luz. רץ כל שעה ונשאר פעיל כשעתיים, כך שתמיד יש ריצה פעילה ששולחת התראות בזמן.
+# צריך רק Secret אחד בשם FIREBASE_SERVICE_ACCOUNT (ראו luz/SETUP.md).
+name: luz notifications
+
+on:
+  schedule:
+    - cron: '7 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write   # to keep the schedule from being paused after 60 quiet days
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    steps:
+      - name: Check configuration
+        id: cfg
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$SA" ]; then echo "FIREBASE_SERVICE_ACCOUNT secret is missing, skipping."; echo "ok=false" >> "$GITHUB_OUTPUT"; else echo "ok=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Keep the schedule enabled
+        if: steps.cfg.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/luz-notify.yml/enable" || true
+
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.ok == 'true'
+        with:
+          sparse-checkout: luz
+
+      - uses: actions/setup-node@v4
+        if: steps.cfg.outputs.ok == 'true'
+        with:
+          node-version: 22
+
+      - name: Install
+        if: steps.cfg.outputs.ok == 'true'
+        run: npm install --prefix luz/sender --no-audit --no-fund
+
+      - name: Send notifications
+        if: steps.cfg.outputs.ok == 'true'
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          SITE_URL: https://reembir.com/h/luz/
+          RUN_MINUTES: ${{ github.event_name == 'workflow_dispatch' && '60' || '125' }}
+        run: node luz/sender/send.mjs

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4F2EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13151A" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="מערכת שעות">
+<title>מערכת שעות</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Suez+One&family=Rubik:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="firebase-config.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>מערכת שעות</h1>
+      <p id="className">כיתה ט</p>
+    </div>
+    <button class="btn icon badge-dot" id="openMsgs" aria-label="הודעות" data-n="0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+    </button>
+    <button class="btn icon" id="openSettings" aria-label="הגדרות התראות">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
+    </button>
+  </header>
+
+  <div id="banners"></div>
+
+  <section class="card cta" id="cta">
+    <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+    <div class="grow"><h3 id="ctaTitle">התראות על כל שיעור</h3><p id="ctaText">קבלו התראה כשמתחיל שיעור, אחרי הפסקה או ארוחה.</p></div>
+    <button class="btn primary" id="ctaBtn">הרשמה</button>
+  </section>
+
+  <section class="card datebar">
+    <div class="head">
+      <button class="btn icon" id="prevDay" aria-label="היום הקודם"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+      <div class="title"><b id="dayTitle"></b><span id="daySub"></span></div>
+      <button class="btn icon" id="nextDay" aria-label="היום הבא"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+    </div>
+    <div class="week" id="week"></div>
+    <div class="row" style="justify-content:center;margin-top:8px;gap:8px">
+      <button class="btn small" id="todayBtn">חזרה להיום</button>
+      <label class="btn small" style="position:relative">בחירת תאריך
+        <input type="date" id="datePick" style="position:absolute;inset:0;opacity:0;width:100%;cursor:pointer">
+      </label>
+    </div>
+  </section>
+
+  <section class="card now hidden" id="nowCard"></section>
+
+  <section class="card">
+    <div class="timeline" id="timeline"></div>
+  </section>
+
+  <div class="legend" id="legend"></div>
+  <footer>הזמנים לפי שעון ישראל · <span id="viewAs"></span></footer>
+</div>
+
+<!-- registration -->
+<div class="sheet-bg" id="regSheet"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="regH">
+  <button class="btn icon x" data-close aria-label="סגירה">✕</button>
+  <h2 id="regH">הרשמה להתראות</h2>
+  <p class="hint">צריך למלא את כל הפרטים. לפי שם המשפחה ומספר היחידות נדע איזה שיעור שלך.</p>
+  <form id="regForm" autocomplete="on">
+    <div class="row" style="gap:10px">
+      <div class="field grow"><label for="fn">שם פרטי</label><input class="input" id="fn" name="given-name" autocomplete="given-name" required maxlength="40"></div>
+      <div class="field grow"><label for="ln">שם משפחה</label><input class="input" id="ln" name="family-name" autocomplete="family-name" required maxlength="40"></div>
+    </div>
+    <div class="field"><label>יחידות באנגלית</label>
+      <div class="seg" id="unitsSeg"><button type="button" data-v="4">4 יח״ל</button><button type="button" data-v="5">5 יח״ל</button></div>
+    </div>
+    <p class="hint" id="groupHint"></p>
+    <p class="hint" id="iosHint"></p>
+    <p class="err" id="regErr"></p>
+    <div class="actions"><button class="btn primary" type="submit" id="regSubmit">הרשמה והפעלת התראות</button></div>
+  </form>
+</div></div>
+
+<!-- settings -->
+<div class="sheet-bg" id="setSheet"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setH">
+  <button class="btn icon x" data-close aria-label="סגירה">✕</button>
+  <h2 id="setH">התאמת התראות</h2>
+  <div id="setBody"></div>
+</div></div>
+
+<!-- messages -->
+<div class="sheet-bg" id="msgSheet"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="msgH">
+  <button class="btn icon x" data-close aria-label="סגירה">✕</button>
+  <h2 id="msgH">הודעות</h2>
+  <div id="msgList"></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

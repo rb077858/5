@@ -1,0 +1,48 @@
+rules_version = '2';
+// כללי אבטחה ל-Firestore. מעתיקים את כל הקובץ ל-Firebase Console → Firestore Database → Rules → Publish.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'rb077858@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+    function validName(s) { return s is string && s.size() > 0 && s.size() <= 40; }
+    function validProfile(d) {
+      return validName(d.firstName) && validName(d.lastName) && (d.units == 4 || d.units == 5);
+    }
+
+    // מערכת השעות: כולם קוראים, רק המנהל כותב.
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // תלמידים: כל אחד רואה ועורך רק את עצמו, ולא יכול לבטל חסימה.
+    match /users/{uid} {
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+      allow create: if request.auth != null && request.auth.uid == uid
+        && validProfile(request.resource.data)
+        && !('blocked' in request.resource.data) && !('groupOverride' in request.resource.data);
+      allow update: if isAdmin() || (request.auth != null && request.auth.uid == uid
+        && resource.data.get('blocked', false) != true
+        && validProfile(request.resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['firstName', 'lastName', 'units', 'group', 'prefs', 'tokens', 'notif', 'ua', 'lastSeen']));
+      allow delete: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+    }
+
+    // הודעות מהמנהל: לכולם או לתלמידים מסוימים.
+    match /messages/{id} {
+      allow read: if isAdmin() || (request.auth != null
+        && (resource.data.audience == 'all' || request.auth.uid in resource.data.uids));
+      allow write: if isAdmin();
+    }
+
+    // לשימוש שרת ההתראות בלבד.
+    match /sent/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+  }
+}
