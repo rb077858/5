@@ -47,6 +47,6 @@ jobs:
         if: steps.cfg.outputs.ok == 'true'
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          SITE_URL: https://reembir.com/h/luz/
+          SITE_URL: https://reembir.com/5/luz/
           RUN_MINUTES: ${{ github.event_name == 'workflow_dispatch' && '60' || '125' }}
         run: node luz/sender/send.mjs

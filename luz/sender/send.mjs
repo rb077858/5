@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs';
 import { israelNow, addDays, weekdayOf, toMin, toHHMM, profileOf, personalDay, transitions, wantsTransition, notificationText, normPrefs, groupFor } from '../core.js';
 
 const RUN_MINUTES = +(process.env.RUN_MINUTES || 125);
-const SITE = process.env.SITE_URL || 'https://reembir.com/h/luz/';
+const SITE = process.env.SITE_URL || 'https://reembir.com/5/luz/';
 const ICON = new URL('icon-192.png', SITE).href;
 
 const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || 'null');
