@@ -162,3 +162,8 @@ footer{margin-top:22px;text-align:center;color:var(--muted);font-size:.8rem}
 .install-app h2{margin:0}
 .install-app p{margin:0;direction:ltr;text-align:right}
 #installNow{font-size:1.05rem;padding:13px 16px}
+.install-status{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:var(--accent-soft);margin-top:12px;font-weight:500}
+.install-status .spin{width:18px;height:18px;border-radius:50%;border:2.5px solid color-mix(in srgb,var(--accent) 30%,transparent);border-top-color:var(--accent);animation:spin .8s linear infinite;flex:none}
+.install-status.done{background:color-mix(in srgb,var(--ok) 14%,transparent)}
+.install-status.done .spin{animation:none;border-color:var(--ok);background:var(--ok);position:relative}
+.install-status.done .spin::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700}

@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Suez+One&family=Rubik:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=7">
 <script src="firebase-config.js"></script>
 </head>
 <body>
@@ -107,11 +107,12 @@
   <button class="btn icon x" data-iclose aria-label="סגירה">✕</button>
   <div class="install-app"><img src="icon-192.png" alt=""><div><h2 id="installH">מערכת שעות</h2><p class="hint">reembir.com/5/luz</p></div></div>
   <p class="hint" id="installHint"></p>
+  <div class="install-status hidden" id="installStatus"><span class="spin"></span><span id="installStatusText"></span></div>
   <div class="actions"><button class="btn primary" id="installNow" disabled>מכין התקנה…</button></div>
 </div></div>
 
 <div class="toast" id="toast"></div>
-<script type="module" src="app.js?v=6"></script>
-<script type="module" src="install.js?v=6"></script>
+<script type="module" src="app.js?v=7"></script>
+<script type="module" src="install.js?v=7"></script>
 </body>
 </html>
