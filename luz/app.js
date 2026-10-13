@@ -370,6 +370,8 @@ async function connect() {
   let unsubs = [];
   A.onAuthStateChanged(auth, user => {
     unsubs.forEach(f => f()); unsubs = [];
+    // a Google sign-in left over from when the admin page shared this auth store is not a student
+    if (user && !user.isAnonymous) { A.signOut(auth); return; }
     state.uid = user?.uid || null;
     if (!user) { state.user = null; state.messages = []; renderCta(); render(); renderMsgs(); return; }
     let touched = false;

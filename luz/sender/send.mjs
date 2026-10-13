@@ -24,12 +24,33 @@ let users = [];
 const log = (...a) => console.log(new Date().toISOString(), ...a);
 
 db.doc('config/schedule').onSnapshot(s => { if (s.exists) { schedule = s.data(); log('schedule loaded'); } }, e => log('schedule error', e.message));
-db.collection('users').onSnapshot(s => { users = s.docs.map(d => ({ id: d.id, ref: d.ref, ...d.data() })); log('users:', users.length); }, e => log('users error', e.message));
+db.collection('users').onSnapshot(s => {
+  users = s.docs.map(d => ({ id: d.id, ref: d.ref, ...d.data() }));
+  log('users:', users.length);
+  dropDuplicateTokens();
+}, e => log('users error', e.message));
+
+// A browser that registered twice (e.g. after its anonymous sign-in was lost) leaves the same
+// device token on two student records. Keep it only on the record seen most recently.
+function dropDuplicateTokens() {
+  const seen = u => u.lastSeen?.toMillis?.() || u.createdAt?.toMillis?.() || 0;
+  const owner = new Map();
+  for (const u of [...users].sort((a, b) => seen(b) - seen(a)))
+    for (const t of u.tokens || []) {
+      if (!owner.has(t)) { owner.set(t, u); continue; }
+      log('removing duplicate token from', u.id, '(kept on', owner.get(t).id + ')');
+      u.tokens = u.tokens.filter(x => x !== t);
+      u.ref.update({ tokens: FieldValue.arrayRemove(t) }).catch(() => {});
+    }
+}
 
 // Send one notification to every device of the given users; drop tokens that are gone.
 async function push(list) { // [{ user, title, body, tag }]
   const msgs = [], owners = [];
+  const used = new Set();
   for (const { user, title, body, tag } of list) for (const token of user.tokens || []) {
+    if (used.has(token)) continue;   // never the same notification twice to one device
+    used.add(token);
     msgs.push({ token, webpush: { notification: { title, body, icon: ICON, badge: ICON, tag, renotify: true, lang: 'he', dir: 'rtl' }, fcmOptions: { link: SITE }, headers: { Urgency: 'high', TTL: '600' } } });
     owners.push({ user, token });
   }
@@ -40,9 +61,14 @@ async function push(list) { // [{ user, title, body, tag }]
       if (r.success) { ok++; return; }
       const { user, token } = owners[i + j];
       const code = r.error?.code || '';
-      if (code.includes('registration-token-not-registered') || code.includes('invalid-registration-token') || code.includes('invalid-argument'))
+      // only a token Google says is gone gets removed; any other error leaves the device registered
+      if (code.includes('registration-token-not-registered') || code.includes('invalid-registration-token')) {
+        log('token gone, removing from', user.id);
         user.ref.update({ tokens: FieldValue.arrayRemove(token) }).catch(() => {});
-      else log('send failed', code, r.error?.message);
+      } else {
+        log('send failed', user.id, code, r.error?.message);
+        db.doc('sent/status').set({ lastError: `${code}: ${r.error?.message || ''}`.slice(0, 300), lastErrorAt: FieldValue.serverTimestamp() }, { merge: true }).catch(() => {});
+      }
     });
   }
   return ok;

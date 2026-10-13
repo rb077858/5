@@ -6,8 +6,10 @@ export const config = self.LUZ_FIREBASE_CONFIG;
 export const vapidKey = self.LUZ_VAPID_KEY;
 export const configured = !!(config && config.apiKey && config.projectId);
 
+// The admin page runs its own Firebase app so its Google sign-in never replaces a student's
+// anonymous sign-in on the same browser (both pages share one origin, and so one auth store).
 let fb = null;
-export async function firebase() {
+export async function firebase(name) {
   if (!configured) return null;
   if (fb) return fb;
   const [appM, authM, fsM] = await Promise.all([
@@ -15,7 +17,7 @@ export async function firebase() {
     import(`${CDN}/firebase-auth.js`),
     import(`${CDN}/firebase-firestore.js`),
   ]);
-  const app = appM.initializeApp(config);
+  const app = name ? appM.initializeApp(config, name) : appM.initializeApp(config);
   fb = { app, auth: authM.getAuth(app), db: fsM.getFirestore(app), A: authM, F: fsM };
   return fb;
 }

@@ -41,7 +41,7 @@ async function start() {
     $('#googleBtn').onclick = () => enter(null);
     return;
   }
-  S.fb = await firebase();
+  S.fb = await firebase('admin');
   const { auth, A } = S.fb;
   A.getRedirectResult(auth).catch(e => showLoginError(e));
   A.onAuthStateChanged(auth, user => {
@@ -636,8 +636,9 @@ function renderStatus() {
   const t = S.status?.beat?.toDate?.();
   if (!t) { el.innerHTML = 'שרת ההתראות עוד לא רץ אף פעם. בדקו את השלב של GitHub Actions ב-SETUP.md.'; return; }
   const ago = Math.round((Date.now() - t) / 60000);
-  el.innerHTML = ago <= 3 ? `<span style="color:var(--ok)">● פעיל</span> · עדכון אחרון לפני ${ago || 'פחות מ־1'} דק׳${S.status.lastSent ? ` · התראה אחרונה: ${esc(S.status.lastSent)}` : ''}`
-    : `<span style="color:var(--danger)">● לא פעיל</span> כבר ${ago} דק׳. בדקו בלשונית Actions במאגר ב-GitHub שהריצה "luz notifications" עובדת.`;
+  const err = S.status.lastError ? `<div class="hint" style="color:var(--danger);direction:ltr;text-align:left">שגיאת שליחה אחרונה (${fmtTs(S.status.lastErrorAt)}): ${esc(S.status.lastError)}</div>` : '';
+  el.innerHTML = (ago <= 3 ? `<span style="color:var(--ok)">● פעיל</span> · עדכון אחרון לפני ${ago || 'פחות מ־1'} דק׳${S.status.lastSent ? ` · התראה אחרונה: ${esc(S.status.lastSent)}` : ''}`
+    : `<span style="color:var(--danger)">● לא פעיל</span> כבר ${ago} דק׳. בדקו בלשונית Actions במאגר ב-GitHub שהריצה "luz notifications" עובדת.`) + err;
 }
 function fillSettings() {
   $('#sClass').value = S.draft.className || '';
