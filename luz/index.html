@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Suez+One&family=Rubik:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=6">
 <script src="firebase-config.js"></script>
 </head>
 <body>
@@ -102,20 +102,16 @@
   <div id="msgList"></div>
 </div></div>
 
-<!-- install guide -->
+<!-- install popup -->
 <div class="sheet-bg" id="installSheet"><div class="sheet install" role="dialog" aria-modal="true" aria-labelledby="installH">
   <button class="btn icon x" data-iclose aria-label="סגירה">✕</button>
-  <h2 id="installH">התקנת האפליקציה</h2>
+  <div class="install-app"><img src="icon-192.png" alt=""><div><h2 id="installH">מערכת שעות</h2><p class="hint">reembir.com/5/luz</p></div></div>
   <p class="hint" id="installHint"></p>
-  <div class="install-grid">
-    <div id="installMock"></div>
-    <ol class="isteps" id="installSteps"></ol>
-  </div>
-  <div class="actions"><button class="btn primary hidden" id="installNow">התקנה עכשיו</button><button class="btn" data-iclose>סגירה</button></div>
+  <div class="actions"><button class="btn primary" id="installNow" disabled>מכין התקנה…</button></div>
 </div></div>
 
 <div class="toast" id="toast"></div>
-<script type="module" src="app.js?v=4"></script>
-<script type="module" src="install.js?v=4"></script>
+<script type="module" src="app.js?v=6"></script>
+<script type="module" src="install.js?v=6"></script>
 </body>
 </html>
