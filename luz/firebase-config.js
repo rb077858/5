@@ -3,7 +3,14 @@
 //
 // 1) הדביקו כאן את האובייקט firebaseConfig מתוך Firebase Console → Project settings → Your apps.
 // 2) הדביקו את ה-Key pair מתוך Project settings → Cloud Messaging → Web Push certificates.
-self.LUZ_FIREBASE_CONFIG = null;
+self.LUZ_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBb6kmJMYClEq1FlBZSKtvrYHaG5GlKV4o",
+  authDomain: "luz-class.firebaseapp.com",
+  projectId: "luz-class",
+  storageBucket: "luz-class.firebasestorage.app",
+  messagingSenderId: "1035710781423",
+  appId: "1:1035710781423:web:c50b9f5a7a6e62fd91881a"
+};
 /* לדוגמה:
 self.LUZ_FIREBASE_CONFIG = {
   apiKey: "AIza...",
