@@ -21,4 +21,4 @@ self.LUZ_FIREBASE_CONFIG = {
   appId: "1:1234567890:web:abcdef"
 };
 */
-self.LUZ_VAPID_KEY = "";
+self.LUZ_VAPID_KEY = "BLTifO14HPfVbo7UMx8V_4Chh4NMMqQUIhst_9NHwROE-hNcOqVhrl9oSX6wRMruZD4MQhpQv4QM93m12pKRens";
