@@ -523,7 +523,7 @@ function renderUsers() {
       <div class="nm"><b>${esc(u.firstName)} ${esc(u.lastName)}</b>
         <div class="tags">
           <span class="tag">קבוצה ${groupOf(u)}${u.groupOverride ? ' (ידני)' : ''}</span><span class="tag">${u.units} יח״ל</span>
-          ${u.blocked ? '<span class="tag bad">חסום</span>' : pushOn(u) ? `<span class="tag ok">התראות פעילות${u.tokens.length > 1 ? ` · ${u.tokens.length} מכשירים` : ''}</span>` : `<span class="tag bad">${u.notif === 'denied' ? 'התראות חסומות בדפדפן' : !normPrefs(u.prefs).enabled ? 'כיבה התראות' : 'אין התראות'}</span>`}
+          ${u.blocked ? '<span class="tag bad">חסום</span>' : pushOn(u) ? `<span class="tag ok">התראות פעילות${u.tokens.length > 1 ? ` · ${u.tokens.length} מכשירים` : ''}</span>` : `<span class="tag bad">${u.notif === 'denied' ? 'התראות חסומות בדפדפן' : u.notif === 'blocked' ? 'גוגל חסום ברשת/בחוסם' : !normPrefs(u.prefs).enabled ? 'כיבה התראות' : 'אין התראות'}</span>`}
           <span class="tag">נרשם ${fmtTs(u.createdAt)}</span><span class="tag">נראה ${fmtTs(u.lastSeen)}</span>
         </div></div>
       <div class="ops">

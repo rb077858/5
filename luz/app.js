@@ -154,6 +154,7 @@ function renderCta() {
   const banners = [];
   if (!configured) banners.push(`<div class="banner">שירות ההתראות עוד לא הוגדר (חסרות הגדרות Firebase). המערכת מוצגת כרגיל.</div>`);
   if (u?.blocked) banners.push(`<div class="banner bad">החשבון שלך נחסם על ידי המנהל ולא יקבל התראות.</div>`);
+  if (state.problem) banners.push(`<div class="banner bad"><button class="btn small" style="float:left" data-dismiss>סגירה</button><b>${esc(state.problem.title)}</b><div>${esc(state.problem.text)}</div></div>`);
   $('#banners').innerHTML = banners.join('');
   cta.classList.toggle('on', !!u);
   if (!u) {
@@ -168,6 +169,7 @@ function renderCta() {
     $('#ctaTitle').textContent = `שלום ${u.firstName}`;
     $('#ctaText').textContent = ok ? `ההתראות פעילות · ${p.lead ? p.lead + ' דק׳ לפני' : 'בזמן ההתחלה'} · קבוצה ${profileOf(u, state.schedule).group}, ${u.units} יח״ל`
       : perm === 'denied' ? 'ההתראות חסומות בדפדפן. צריך לאשר אותן בהגדרות האתר.'
+      : u.notif === 'blocked' ? 'החיבור לשרת ההתראות חסום ברשת או בדפדפן. לחצו "הפעלה" לבדיקה חוזרת.'
       : !p.enabled ? 'ההתראות כבויות כרגע.' : 'עוד לא אושרו התראות במכשיר הזה.';
     $('#ctaBtn').textContent = ok ? 'התאמה' : 'הפעלה';
     $('#ctaBtn').onclick = ok ? openSettings : enablePush;
@@ -207,7 +209,8 @@ $('#regForm').onsubmit = async e => {
     if (!auth.currentUser) await A.signInAnonymously(auth);
     const uid = auth.currentUser.uid;
     let token = null, notif = 'granted';
-    try { token = await pushToken(); } catch (x) { notif = x.message === 'denied' ? 'denied' : 'unsupported'; console.warn(x); }
+    let pushErr = null;
+    try { token = await pushToken(); } catch (x) { pushErr = x; notif = notifState(x); console.warn(x, x.cause); }
     const ref = F.doc(db, 'users', uid);
     const base = { firstName, lastName, units, group: groupFor(lastName, state.schedule?.groupRule?.letters), notif, ua: navigator.userAgent.slice(0, 180), lastSeen: F.serverTimestamp() };
     if (state.user) {
@@ -216,22 +219,41 @@ $('#regForm').onsubmit = async e => {
       await F.setDoc(ref, { ...base, prefs: DEFAULT_PREFS, tokens: token ? [token] : [], createdAt: F.serverTimestamp() });
     }
     closeSheet(btn);
-    toast(token ? 'נרשמת! ההתראות פעילות ✓' : notif === 'denied' ? 'נרשמת, אבל ההתראות חסומות בדפדפן' : 'נרשמת. המכשיר הזה לא תומך בהתראות' + (isIOS && !standalone ? ' (צריך להוסיף למסך הבית)' : ''));
+    if (token) { state.problem = null; toast('נרשמת! ההתראות פעילות ✓'); }
+    else showProblem('נרשמת, אבל ההתראות עוד לא פועלות', pushError(pushErr));
   } catch (x) {
     console.error(x);
     err.textContent = x.code === 'permission-denied' ? 'אין הרשאה (ייתכן שהחשבון נחסם)' : 'משהו השתבש: ' + (x.code || x.message);
   } finally { btn.disabled = false; }
 };
 
+// What went wrong when asking for a push token, in words a student can act on.
+function pushError(x) {
+  if (x.message === 'denied') return 'ההתראות חסומות בדפדפן. לוחצים על המנעול ליד הכתובת ← הרשאות ← התראות ← לאפשר.';
+  if (x.message === 'unsupported') return isIOS && !standalone ? 'באייפון צריך קודם להוסיף את האתר למסך הבית ולהיכנס משם.' : 'הדפדפן הזה לא תומך בהתראות.';
+  if (x.message === 'blocked') return `החיבור לשרת ההתראות של גוגל חסום (${x.hosts.join(', ')}). בדרך כלל זה חוסם פרסומות, סינון אינטרנט (כמו נטפרי או רימון) או VPN. אפשר לכבות את החוסם לאתר הזה, לבקש מהסינון לפתוח את הכתובות, או לנסות ברשת אחרת.`;
+  return 'לא הצלחנו להפעיל התראות: ' + (x.code || x.message);
+}
+const notifState = x => x.message === 'denied' ? 'denied' : x.message === 'blocked' ? 'blocked' : x.message === 'unsupported' ? 'unsupported' : 'error';
+
 async function enablePush() {
   try {
     const token = await pushToken();
     const { db, F } = await firebase();
     await F.updateDoc(F.doc(db, 'users', state.uid), { tokens: F.arrayUnion(token), notif: 'granted', 'prefs.enabled': true });
+    state.problem = null; renderCta();
     toast('ההתראות פעילות ✓');
   } catch (x) {
-    toast(x.message === 'denied' ? 'ההתראות חסומות. אפשרו אותן בהגדרות האתר בדפדפן' : x.message === 'unsupported' ? (isIOS && !standalone ? 'באייפון צריך קודם להוסיף את האתר למסך הבית' : 'הדפדפן הזה לא תומך בהתראות') : 'שגיאה: ' + (x.code || x.message));
+    console.warn(x, x.cause);
+    if (state.uid) firebase().then(({ db, F }) => F.updateDoc(F.doc(db, 'users', state.uid), { notif: notifState(x) })).catch(() => {});
+    showProblem('ההתראות לא הופעלו', pushError(x));
   }
+}
+
+function showProblem(title, text) {
+  state.problem = { title, text };
+  renderCta();
+  scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ---------- settings ----------
@@ -316,6 +338,7 @@ function openSettings() {
   openSheet('#setSheet');
 }
 $('#openSettings').onclick = openSettings;
+$('#banners').onclick = e => { if (e.target.matches('[data-dismiss]')) { state.problem = null; renderCta(); } };
 
 // ---------- messages ----------
 function renderMsgs() {
