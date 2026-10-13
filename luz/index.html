@@ -8,13 +8,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="מערכת שעות">
 <title>מערכת שעות</title>
-<link rel="manifest" href="manifest.webmanifest">
+<!-- the manifest is added by install.js only on the install guide (?install) -->
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Suez+One&family=Rubik:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=4">
 <script src="firebase-config.js"></script>
 </head>
 <body>
@@ -24,6 +24,9 @@
       <h1>מערכת שעות</h1>
       <p id="className">כיתה ט</p>
     </div>
+    <button class="btn small install-btn hidden" id="installBtn" aria-label="התקנת אפליקציה">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span>התקנה</span>
+    </button>
     <button class="btn icon badge-dot" id="openMsgs" aria-label="הודעות" data-n="0">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
     </button>
@@ -99,7 +102,20 @@
   <div id="msgList"></div>
 </div></div>
 
+<!-- install guide -->
+<div class="sheet-bg" id="installSheet"><div class="sheet install" role="dialog" aria-modal="true" aria-labelledby="installH">
+  <button class="btn icon x" data-iclose aria-label="סגירה">✕</button>
+  <h2 id="installH">התקנת האפליקציה</h2>
+  <p class="hint" id="installHint"></p>
+  <div class="install-grid">
+    <div id="installMock"></div>
+    <ol class="isteps" id="installSteps"></ol>
+  </div>
+  <div class="actions"><button class="btn primary hidden" id="installNow">התקנה עכשיו</button><button class="btn" data-iclose>סגירה</button></div>
+</div></div>
+
 <div class="toast" id="toast"></div>
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=4"></script>
+<script type="module" src="install.js?v=4"></script>
 </body>
 </html>

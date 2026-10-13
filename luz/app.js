@@ -16,6 +16,7 @@ const state = {
   uid: null,
   messages: [],
   viewProfile: store.get('viewProfile', null),   // for people who haven't registered
+  loading: configured,  // true until we know whether this browser is registered
 };
 
 // ---------- utils ----------
@@ -157,6 +158,14 @@ function renderCta() {
   if (state.problem) banners.push(`<div class="banner bad"><button class="btn small" style="float:left" data-dismiss>סגירה</button><b>${esc(state.problem.title)}</b><div>${esc(state.problem.text)}</div></div>`);
   $('#banners').innerHTML = banners.join('');
   cta.classList.toggle('on', !!u);
+  cta.classList.toggle('loading', state.loading);
+  if (state.loading) {
+    $('#ctaTitle').textContent = 'טוען…';
+    $('#ctaText').textContent = 'בודקים אם המכשיר הזה כבר רשום';
+    $('#ctaBtn').textContent = '';
+    $('#ctaBtn').onclick = null;
+    return;
+  }
   if (!u) {
     $('#ctaTitle').textContent = 'התראות על כל שיעור';
     $('#ctaText').textContent = 'קבלו התראה כשמתחיל שיעור, אחרי הפסקה או ארוחה.';
@@ -373,10 +382,11 @@ async function connect() {
     // a Google sign-in left over from when the admin page shared this auth store is not a student
     if (user && !user.isAnonymous) { A.signOut(auth); return; }
     state.uid = user?.uid || null;
-    if (!user) { state.user = null; state.messages = []; renderCta(); render(); renderMsgs(); return; }
+    if (!user) { state.loading = false; state.user = null; state.messages = []; renderCta(); render(); renderMsgs(); return; }
     let touched = false;
     unsubs.push(F.onSnapshot(F.doc(db, 'users', user.uid), async snap => {
       state.user = snap.exists() ? snap.data() : null;
+      state.loading = false;
       renderCta(); render();
       if (state.user && !touched && !state.user.blocked) {
         touched = true;
@@ -387,7 +397,7 @@ async function connect() {
         }
         F.updateDoc(snap.ref, upd).catch(() => {});
       }
-    }, () => {}));
+    }, () => { state.loading = false; renderCta(); }));
     const msgs = { all: [], me: [] };
     const merge = () => { state.messages = [...msgs.all, ...msgs.me].sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)).slice(0, 50); renderMsgs(); };
     unsubs.push(F.onSnapshot(F.query(F.collection(db, 'messages'), F.where('audience', '==', 'all')), s => { msgs.all = s.docs.map(d => d.data()); merge(); }, () => {}));
@@ -403,7 +413,9 @@ async function connect() {
   state.schedule = store.get('schedule', null);
   if (!state.schedule || !configured) state.schedule = await loadDefault();
   render(); renderCta(); renderMsgs();
-  if (configured) connect().catch(e => { console.error(e); toast('אין חיבור לשרת. מוצגת המערכת השמורה'); });
+  if (configured) connect().catch(e => { console.error(e); state.loading = false; renderCta(); toast('אין חיבור לשרת. מוצגת המערכת השמורה'); });
+  // never leave the card spinning if the server doesn't answer
+  setTimeout(() => { if (state.loading) { state.loading = false; renderCta(); } }, 10000);
   // keep the now-line moving; jump to the new day at midnight if the user is on "today"
   let lastToday = israelNow().date;
   setInterval(() => {
@@ -414,6 +426,4 @@ async function connect() {
   }, 30000);
   addEventListener('hashchange', () => { const h = location.hash.slice(1); if (/^\d{4}-\d{2}-\d{2}$/.test(h) && h !== state.date) setDate(h, false); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
-  // scroll the current item into view on first load
-  requestAnimationFrame(() => document.querySelector('.item.cur')?.scrollIntoView({ block: 'center' }));
 })();

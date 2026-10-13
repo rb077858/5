@@ -3,6 +3,7 @@
   "short_name": "מערכת שעות",
   "lang": "he",
   "dir": "rtl",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
