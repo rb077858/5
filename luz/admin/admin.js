@@ -397,7 +397,8 @@ function splitButtons() {
   const lab = it.split === 'group' ? k => `קבוצה ${k} ${k === '1' ? '(א–ל)' : '(מ–ת)'}` : k => `${k} יח״ל`;
   $('#iVariants').innerHTML = keys.map(k => `<div class="variant"><h4>${lab(k)}</h4>
     <div class="row"><div class="field grow"><label>שם</label><input class="input" data-vk="${k}" data-f="title" value="${esc(it.variants?.[k]?.title || '')}" placeholder="${esc($('#iTitle').value)}"></div>
-    <div class="field grow"><label>מורה</label><input class="input" data-vk="${k}" data-f="teacher" value="${esc(it.variants?.[k]?.teacher || '')}"></div></div></div>`).join('');
+    <div class="field grow"><label>מורה</label><input class="input" data-vk="${k}" data-f="teacher" value="${esc(it.variants?.[k]?.teacher || '')}"></div>
+    <div class="field grow"><label>חדר</label><input class="input" data-vk="${k}" data-f="note" value="${esc(it.variants?.[k]?.note || '')}"></div></div></div>`).join('');
   $('#iTeacher').closest('.field').classList.toggle('hidden', !!it.split);
 }
 $('#iSplit').onclick = e => {

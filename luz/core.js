@@ -89,9 +89,9 @@ export function resolveItem(it, profile) {
   if (!it.split || !it.variants) return { ...it };
   const key = it.split === 'group' ? profile?.group : profile?.units;
   const v = key != null ? it.variants[String(key)] : null;
-  if (v) return { ...it, title: v.title || it.title, teacher: v.teacher || '', variantKey: String(key) };
+  if (v) return { ...it, title: v.title || it.title, teacher: v.teacher || '', note: v.note || it.note, variantKey: String(key) };
   const label = it.split === 'group' ? (k => `קבוצה ${k}`) : (k => `${k} יח״ל`);
-  const lines = Object.entries(it.variants).map(([k, x]) => `${label(k)}: ${x.title && !x.title.startsWith(it.title) ? x.title + ' – ' : ''}${x.teacher || ''}`);
+  const lines = Object.entries(it.variants).map(([k, x]) => `${label(k)}: ${x.title && !x.title.startsWith(it.title) ? x.title + ' – ' : ''}${x.teacher || ''}${x.note ? ` (${x.note})` : ''}`);
   return { ...it, teacher: lines.join(' · '), lines, mixed: true };
 }
 
