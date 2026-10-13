@@ -85,3 +85,18 @@
 - **"הדומיין לא מאושר" בכניסת מנהל** → שלב 3.3.
 - **בהגדרות כתוב "לא פעיל"** → ב-Actions בודקים שהריצה האחרונה הצליחה ושה-Secret קיים בשם המדויק `FIREBASE_SERVICE_ACCOUNT`.
 - **תלמיד לא מקבל התראות** → בדף הניהול, בלשונית תלמידים, רואים אם ההתראות שלו פעילות, חסומות בדפדפן או כבויות.
+
+## אילו כתובות לפתוח בסינון / DNS
+אם יש סינון או DNS חוסם, צריך לאפשר את הכתובות האלה, אחרת אי אפשר להירשם להתראות או לקבל אותן:
+
+| כתובת | למה |
+|---|---|
+| `firebaseinstallations.googleapis.com` | רישום המכשיר ב-Firebase |
+| `fcmregistrations.googleapis.com` | קבלת "כתובת" להתראות |
+| `fcm.googleapis.com` | שרת ההתראות של גוגל |
+| `mtalk.google.com` (גם `mtalk4.google.com`, `alt1-mtalk.google.com` עד `alt8-mtalk.google.com`) | החיבור הקבוע של כרום שדרכו ההתראות מגיעות |
+| `android.clients.google.com` | רישום כרום לשירות ההתראות |
+| `firestore.googleapis.com`, `identitytoolkit.googleapis.com`, `securetoken.googleapis.com` | המערכת, ההרשמה וההתחברות |
+| `www.gstatic.com`, `apis.google.com`, `luz-class.firebaseapp.com`, `accounts.google.com` | ספריות Firebase וכניסת המנהל עם Google |
+
+אם הסינון מאפשר תווים כלליים, הכי פשוט: `*.googleapis.com`, `*.gstatic.com`, `*mtalk.google.com`, `android.clients.google.com`, `*.firebaseapp.com`.

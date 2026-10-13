@@ -595,7 +595,9 @@ function targets() {
 }
 function renderAudHint() {
   const t = targets();
-  $('#mAudHint').textContent = aud === 'all' ? `${t.length} תלמידים (לא כולל חסומים)` : `${t.length} תלמידים: ${t.slice(0, 8).map(u => u.firstName + ' ' + u.lastName).join(', ')}${t.length > 8 ? '…' : ''}`;
+  const live = t.filter(u => (u.tokens || []).length).length;
+  $('#mAudHint').textContent = (aud === 'all' ? `${t.length} תלמידים (לא כולל חסומים)` : `${t.length} תלמידים: ${t.slice(0, 8).map(u => u.firstName + ' ' + u.lastName).join(', ')}${t.length > 8 ? '…' : ''}`)
+    + ` · ${live ? `ל־${live} מהם יש מכשיר עם התראות` : 'לאף אחד מהם אין עדיין מכשיר עם התראות, אז ההודעה תופיע רק באתר'}`;
 }
 $('#mSend').onclick = async () => {
   const title = $('#mTitle').value.trim(), body = $('#mBody').value.trim(), push = $('#mPush').checked;
@@ -617,7 +619,7 @@ function renderMessages() {
   const labels = { all: 'כולם', g1: 'קבוצה 1', g2: 'קבוצה 2', u4: '4 יח״ל', u5: '5 יח״ל' };
   $('#msgHistory').innerHTML = S.messages.length ? S.messages.map(m => `<div class="card mh" data-id="${m.id}">
     <div class="grow"><b>${esc(m.title)}</b>${m.body ? `<div>${esc(m.body)}</div>` : ''}
-      <div class="hint">${fmtTs(m.createdAt)} · ${m.audience === 'all' ? 'כולם' : labels[m.label] || `${(m.uids || []).length} נבחרים`} · ${m.push ? (st[m.status] || m.status) + (m.delivered != null ? ` (${m.delivered} מכשירים)` : '') : 'באתר בלבד'}</div></div>
+      <div class="hint">${fmtTs(m.createdAt)} · ${m.audience === 'all' ? 'כולם' : labels[m.label] || `${(m.uids || []).length} נבחרים`} · ${m.push ? (st[m.status] || m.status) + (m.delivered != null ? (m.delivered ? ` (${m.delivered} מכשירים)` : ' ל־0 מכשירים: לנמענים אין התראות פעילות') : '') : 'באתר בלבד'}</div></div>
     <button class="btn small danger" data-op="del">מחיקה</button></div>`).join('') : '<div class="empty"><p>עוד לא נשלחו הודעות</p></div>';
 }
 $('#msgHistory').onclick = async e => {
