@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4A33C4">
+<title>מחזור המלכים במילים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Suez+One&family=Rubik:wght@400;500;600;700&display=swap">
+<style>
+[hidden]{display:none!important}
+html,body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px)}
+/* Layout: one centered column (max 1080px), sticky month bar on top, sections stacked; RTL throughout */
+:root{
+  --bg:#F2F1F8; --surface:#FFFFFF; --sunk:#E9E7F3; --ink:#1C1838; --muted:#625E82; --line:#DEDBEC;
+  --royal:#4A33C4; --royal-soft:#E4DFFF; --gold:#946500; --gold-bar:#D9A520; --gold-soft:#FAEDC8;
+  --danger:#C22B47; --danger-soft:#FBE1E6; --ok:#1F7A4D;
+  --display:"Suez One","Rubik",Georgia,serif; --body:"Rubik",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#110F24; --surface:#1B1835; --sunk:#242046; --ink:#EEECFB; --muted:#A6A2C8; --line:#2E2A55;
+  --royal:#9C8CFF; --royal-soft:#2E2766; --gold:#F0C04A; --gold-bar:#E3AE2E; --gold-soft:#5A4A26;
+  --danger:#FF7088; --danger-soft:#3E1C27; --ok:#5ED39A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#110F24; --surface:#1B1835; --sunk:#242046; --ink:#EEECFB; --muted:#A6A2C8; --line:#2E2A55;
+  --royal:#9C8CFF; --royal-soft:#2E2766; --gold:#F0C04A; --gold-bar:#E3AE2E; --gold-soft:#5A4A26;
+  --danger:#FF7088; --danger-soft:#3E1C27; --ok:#5ED39A; color-scheme:dark}
+*{box-sizing:border-box}
+html{direction:rtl}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:0 48px;font-variant-numeric:tabular-nums}
+.wrap{max-width:1080px;margin-inline:auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0;line-height:1.2}
+h2{font-size:1.6rem}
+h3{font-size:1.1rem}
+p{margin:0}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--royal);outline-offset:2px}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);margin-inline:-16px;padding:10px 16px;border-bottom:1px solid var(--line)}
+.bar-in{max-width:1080px;margin-inline:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bar-title{font-family:var(--display);font-size:1.05rem;margin-inline-end:auto;white-space:nowrap}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;cursor:pointer;font-size:.9rem}
+.pill[aria-pressed="true"]{background:var(--royal);border-color:var(--royal);color:var(--surface);font-weight:600}
+
+/* hero */
+.hero{padding-top:24px;display:grid;gap:18px}
+.crowns{font-size:.8rem;letter-spacing:.12em;color:var(--gold);font-weight:600}
+.hero h1{font-size:clamp(2rem,6vw,3.4rem)}
+.hero h1 em{font-style:normal;color:var(--royal)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.stat b{display:block;font-family:var(--display);font-size:1.9rem;font-weight:400;line-height:1.1}
+.stat span{font-size:.85rem;color:var(--muted)}
+
+section.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px clamp(16px,3vw,28px);display:flex;flex-direction:column;gap:16px;min-width:0}
+.head{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.head p{color:var(--muted);font-size:.9rem;max-width:60ch}
+.seg{display:inline-flex;background:var(--sunk);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:5px 12px;border-radius:8px;cursor:pointer;font-size:.85rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgb(0 0 0/.12)}
+
+/* budget */
+.budget{display:flex;flex-direction:column;gap:6px}
+.brow{display:grid;grid-template-columns:7.5rem 1fr 6.5rem;align-items:center;gap:10px;padding:3px 0;cursor:pointer;border-radius:8px}
+.brow:hover .bname{color:var(--royal)}
+.bname{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{height:18px;background:var(--gold-soft);border-radius:5px;overflow:hidden;display:flex;position:relative}
+.fill{background:var(--royal);height:100%;border-radius:5px 0 0 5px;transition:width .5s ease}
+.over .track{background:var(--danger-soft)}
+.over .fill{background:var(--danger)}
+.bval{font-size:.85rem;text-align:start;white-space:nowrap}
+.bval b{font-weight:600}
+.chip{display:inline-block;font-size:.72rem;font-weight:600;border-radius:999px;padding:1px 8px;margin-inline-start:4px}
+.chip.bad{background:var(--danger-soft);color:var(--danger)}
+.chip.warn{background:var(--gold-soft);color:var(--gold)}
+.legend{display:flex;gap:16px;font-size:.82rem;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-inline-end:5px}
+
+/* matrix */
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:7px 10px;text-align:start;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:600;color:var(--muted);font-size:.8rem;cursor:pointer}
+td.num{text-align:center}
+.cell{display:inline-block;min-width:3.2rem;text-align:center;border-radius:6px;padding:2px 6px}
+
+/* awards */
+.awards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.award{border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;gap:4px;background:var(--bg)}
+.award .ic{font-size:1.6rem;line-height:1}
+.award .t{font-size:.8rem;color:var(--muted);letter-spacing:.02em}
+.award .w{font-family:var(--display);font-size:1.3rem;color:var(--royal)}
+.award .why{font-size:.85rem}
+
+/* long messages */
+.msgs{display:flex;flex-direction:column;gap:10px}
+.msg{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;gap:6px;background:var(--bg);min-width:0}
+.msg .meta{display:flex;gap:10px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);align-items:center}
+.msg .who{font-weight:600;color:var(--ink);cursor:pointer}
+.msg .txt{white-space:pre-wrap;overflow-wrap:anywhere;max-height:7.8em;overflow:hidden;position:relative}
+.msg.open .txt{max-height:none}
+.msg .more{justify-self:start;border:0;background:none;color:var(--royal);cursor:pointer;padding:0;font-size:.85rem}
+.wc{background:var(--royal-soft);color:var(--royal);border-radius:999px;padding:1px 9px;font-weight:600}
+.lrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:9px 14px}
+.lrow .who{font-weight:600;cursor:pointer}
+.lrow .wc{margin-inline-start:auto}
+.rk{font-family:var(--display);color:var(--gold);min-width:1.4rem}
+mark{background:var(--gold-soft);color:var(--ink);border-radius:3px;padding:0 2px}
+
+/* heat */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:22px}
+.heat{display:grid;grid-template-columns:2.6rem repeat(24,1fr);gap:2px;font-size:.68rem;color:var(--muted);min-width:520px}
+.heat div{aspect-ratio:1;border-radius:3px}
+.heat .lab{aspect-ratio:auto;display:flex;align-items:center}
+.heat .hl{aspect-ratio:auto;text-align:center}
+.timeline{width:100%;height:auto;display:block}
+.timeline text{fill:var(--muted);font-size:10px;font-family:var(--body)}
+
+/* words */
+.cloud{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}
+.cloud span{cursor:pointer;line-height:1.2}
+.cloud span:hover{color:var(--royal)}
+.emo{display:flex;flex-wrap:wrap;gap:8px}
+.emo span{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:4px 10px;font-size:1.15rem}
+.emo small{font-size:.75rem;color:var(--muted);margin-inline-start:4px}
+
+/* profile */
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+select,input[type=search],textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+select{padding-inline-end:28px}
+.prof{display:grid;gap:18px}
+.ptop{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.avatar{width:64px;height:64px;border-radius:50%;background:var(--royal);color:var(--surface);display:grid;place-items:center;font-family:var(--display);font-size:1.7rem;flex:none}
+.ptop h3{font-size:1.8rem}
+.minis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.mini{background:var(--bg);border-radius:12px;padding:10px 12px}
+.mini b{display:block;font-size:1.35rem;font-weight:600}
+.mini span{font-size:.78rem;color:var(--muted)}
+.hours{display:flex;align-items:flex-end;gap:2px;height:80px}
+.hours div{flex:1;background:var(--royal);border-radius:2px 2px 0 0;min-height:1px;opacity:.85}
+.hours-l{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted)}
+
+/* versus */
+.vs{display:grid;gap:8px}
+.vrow{display:grid;grid-template-columns:1fr 8rem 1fr;align-items:center;gap:8px;font-size:.88rem}
+.vrow .l,.vrow .r{display:flex;align-items:center;gap:6px}
+.vrow .l{flex-direction:row-reverse}
+.vrow .lab{text-align:center;color:var(--muted);font-size:.8rem}
+.vb{height:14px;border-radius:4px}
+.vrow .l .vb{background:var(--royal)}
+.vrow .r .vb{background:var(--gold-bar)}
+.vrow .win{font-weight:700}
+
+/* calculator */
+textarea{width:100%;min-height:90px;resize:vertical}
+.calc-out{display:flex;gap:18px;flex-wrap:wrap;align-items:baseline}
+.calc-out b{font-family:var(--display);font-size:2.4rem;font-weight:400;color:var(--royal)}
+.toks{display:flex;flex-wrap:wrap;gap:4px}
+.toks span{background:var(--royal-soft);color:var(--royal);border-radius:6px;padding:1px 7px;font-size:.82rem}
+
+footer{color:var(--muted);font-size:.82rem;max-width:70ch;display:grid;gap:6px}
+.empty{color:var(--muted);font-size:.9rem;padding:8px 0}
+section.card{scroll-margin-top:70px}
+.tabs{display:none}
+.sheet{position:fixed;inset:0;z-index:9;background:rgb(0 0 0/.35);display:flex;align-items:flex-end}
+.sheet-in{background:var(--surface);width:100%;border-radius:18px 18px 0 0;padding:12px 16px calc(78px + env(safe-area-inset-bottom,0px));display:grid;gap:4px}
+.sheet-in a{color:var(--ink);text-decoration:none;font-size:1.05rem;padding:14px 12px;border-radius:12px;background:var(--bg)}
+@media (max-width:760px){
+  body{padding-block:0 calc(84px + env(safe-area-inset-bottom,0px))}
+  .tabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;inset-inline:0;z-index:10;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 4px env(safe-area-inset-bottom,0px)}
+  .tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 4px;color:var(--muted);text-decoration:none;font-size:.7rem;border-radius:12px;min-height:52px;justify-content:center;-webkit-tap-highlight-color:transparent}
+  .tabs svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tabs a.on{color:var(--royal);font-weight:600}
+  .tabs a.on svg{stroke-width:2.3}
+  .bar{padding:8px 16px}
+  .pills{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;width:100%;-webkit-overflow-scrolling:touch}
+  .pills::-webkit-scrollbar{display:none}
+  .pill{flex:1 0 auto;padding:9px 14px;font-size:.95rem}
+  .hero{padding-top:14px;gap:12px}
+  .hero h1{font-size:2rem}
+  .stats{grid-template-columns:repeat(2,1fr);gap:8px}
+  .stat{padding:10px 12px}
+  .stat b{font-size:1.45rem}
+  .stat:last-child{grid-column:1/-1}
+  section.card{border-radius:16px;padding:16px 14px;gap:12px}
+  h2{font-size:1.35rem}
+  .head{align-items:stretch}
+  .ctrl{width:100%}
+  .ctrl select{flex:1;min-width:0;min-height:44px;font-size:1rem}
+  .seg{width:100%}.seg button{flex:1;min-height:38px}
+  .heat{min-width:0;grid-template-columns:1.6rem repeat(24,1fr);gap:1.5px;font-size:.6rem}
+  .awards{grid-template-columns:repeat(2,1fr);gap:8px}
+  .award{padding:11px}
+  .award .w{font-size:1.1rem}
+  .award .why{font-size:.78rem}
+  .minis{grid-template-columns:repeat(3,1fr);gap:6px}
+  .mini b{font-size:1.1rem}
+  .brow{min-height:30px}
+  .wrap{gap:16px}
+}
+@media (max-width:560px){
+  .brow{grid-template-columns:5.5rem 1fr 5.2rem;gap:6px}
+  .vrow{grid-template-columns:1fr 5.5rem 1fr}
+  .bar-title{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="bar"><div class="bar-in">
+  <div class="bar-title">👑 מחזור המלכים</div>
+  <div class="pills" id="months" role="group" aria-label="בחירת חודש"></div>
+</div></div>
+
+<nav class="tabs" id="tabs" aria-label="ניווט בין חלקי הדף">
+  <a href="#budget-sec" data-s="budget-sec"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg><span>תקציב</span></a>
+  <a href="#awards-sec" data-s="awards-sec"><svg viewBox="0 0 24 24"><path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/></svg><span>פרסים</span></a>
+  <a href="#profile-sec" data-s="profile-sec"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg><span>אישי</span></a>
+  <a href="#vs-sec" data-s="vs-sec"><svg viewBox="0 0 24 24"><path d="M7 4v16M17 4v16M3 12h8M13 12h8"/></svg><span>ראש בראש</span></a>
+  <a href="#more" data-s="more" id="more-btn"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg><span>עוד</span></a>
+</nav>
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-in">
+    <a href="#long-sec">ההודעות הכי ארוכות</a>
+    <a href="#time-sec">מתי הקבוצה מדברת</a>
+    <a href="#words-sec">המילים של הקבוצה</a>
+    <a href="#calc-sec">מחשבון מילים</a>
+  </div>
+</div>
+<div class="wrap">
+  <header class="hero">
+    <div class="crowns">מחזור ה׳ · המלכים · הר עציון</div>
+    <h1>כל מילה <em>נספרת.</em></h1>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <section class="card" id="budget-sec">
+    <div class="head">
+      <div><h2 id="budget-h">תקציב המילים</h2><p id="budget-p"></p></div>
+      <div class="seg" id="bsort"><button aria-pressed="true" data-k="left">לפי מה שנשאר</button><button data-k="name">לפי שם</button></div>
+    </div>
+    <div class="legend"><span><i style="background:var(--royal)"></i>נשאר</span><span><i style="background:var(--gold-soft);border:1px solid var(--gold-bar)"></i>נוצל</span><span><i style="background:var(--danger)"></i>חרג מהתקציב</span></div>
+    <div class="budget" id="budget"></div>
+    <div class="scroll" id="matrix" hidden></div>
+  </section>
+
+  <section class="card" id="awards-sec">
+    <div class="head"><div><h2>טקס הפרסים</h2><p id="awards-p">מי זכה במה בתקופה שבחרת.</p></div></div>
+    <div class="awards" id="awards"></div>
+  </section>
+
+  <section class="card" id="long-sec">
+    <div class="head"><div><h2>ההודעות הכי ארוכות</h2><p>עשר ההודעות עם הכי הרבה מילים בתקופה. רק מי, מתי וכמה. התוכן נשאר בקבוצה.</p></div></div>
+    <div class="msgs" id="longest"></div>
+  </section>
+
+  <section class="card" id="time-sec">
+    <div class="head"><div><h2>מתי הקבוצה מדברת</h2><p>מילים לפי יום ושעה. ככל שהריבוע כהה יותר, כתבו יותר.</p></div></div>
+    <div class="grid2">
+      <div class="scroll"><div class="heat" id="heat"></div></div>
+      <div><svg class="timeline" id="timeline" role="img" aria-label="מילים לפי יום"></svg><p class="small muted" id="tl-cap"></p></div>
+    </div>
+  </section>
+
+  <section class="card" id="words-sec">
+    <div class="head"><div><h2>המילים של הקבוצה</h2><p>המילים שחוזרות הכי הרבה (בלי מילות קישור).</p></div></div>
+    <div class="cloud" id="cloud"></div>
+    <h3>אימוג׳ים מובילים</h3>
+    <div class="emo" id="emo"></div>
+  </section>
+
+  <section class="card" id="profile-sec">
+    <div class="head"><div><h2>כרטיס אישי</h2><p>בחר מישהו וראה את כל הנתונים שלו.</p></div>
+      <div class="ctrl"><label class="small muted" for="psel">משתתף</label><select id="psel"></select></div></div>
+    <div class="prof" id="prof"></div>
+  </section>
+
+  <section class="card" id="vs-sec">
+    <div class="head"><div><h2>ראש בראש</h2><p>שני משתתפים, אחד מול השני, בתקופה שבחרת.</p></div>
+      <div class="ctrl"><select id="va" aria-label="משתתף ראשון"></select><span class="muted">מול</span><select id="vb" aria-label="משתתף שני"></select></div></div>
+    <div class="vs" id="vs"></div>
+  </section>
+
+  <section class="card" id="calc-sec">
+    <div class="head"><div><h2>מחשבון מילים</h2><p>הדבק הודעה לפני ששולחים ותראה כמה היא תעלה לך מתוך ה-500. מקפים, לוכסנים ואותיות באנגלית באמצע מילה לא יעזרו כאן.</p></div></div>
+    <textarea id="calc" aria-label="טקסט לספירה" placeholder="הדבק או כתוב כאן הודעה"></textarea>
+    <div class="calc-out"><div><b id="calc-n">0</b> <span class="muted">מילים</span></div></div>
+    <div class="toks" id="calc-t"></div>
+  </section>
+
+  <footer>
+    <p><b>איך סופרים:</b> רווח וכל סימן (מקף, לוכסן, קו תחתון, אימוג׳י וכו׳) מפרידים בין מילים, ולכן "ראם/הלך/לטיול" זה 3 מילים. גם מעבר בין עברית, אנגלית ומספרים מתחיל מילה חדשה, ולכן "ראםhsjהלךaלטיול" זה 5 מילים. סימני פיסוק (נקודה, פסיק, סימן שאלה וקריאה, נקודתיים, גרש, גרשיים וסוגריים) לא מפרידים ולא נספרים.</p>
+    <p><b>כל תמונה, סרטון, סטיקר, הודעה קולית או קובץ שווים 20 מילים. (ועוד המילים בכיתוב, אם יש).</b> תמונות גרף שראם שולח עם 🔹 בכיתוב לא נספרות. גם תמונות גרף שנשלחו בלי 🔹 ונרשמו ידנית לא נספרות, וה-20 מילים של כל אחת מוחזרות ומסומנות ב-+ ליד המספר. שאלות ותשובות בסקרים נספרות. קישורים, הודעות שנמחקו, אימוג׳ים והודעות מערכת לא נספרים. התקציב הוא 500 מילים לכל אחד בכל חודש לועזי.</p>
+    <p id="asof"></p>
+  </footer>
+</div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function(){
+const D=JSON.parse(document.getElementById('data').textContent);
+const P=D.people, BUDGET=500;
+const M=D.msgs.map(m=>({d:m[0],t:m[1],p:m[2],w:m[3],k:m[4],e:m[5],q:m[6]}));
+const TOPS=D.tops, ADJ=D.adj||{};
+// graph images (Ram's screenshots) that don't count, per month|person
+const freeImgs=(p,k)=>k==='all'?Object.entries(ADJ).reduce((s,[key,v])=>s+(key.endsWith('|'+p)?v:0),0):(ADJ[k+'|'+p]||0);
+
+const HEB_M=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const DAYS=['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>n.toLocaleString('he-IL');
+const hm=t=>String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');
+const dd=d=>{const [y,m,day]=d.split('-');return `${+day}.${+m}.${y.slice(2)}`};
+const monthKey=d=>d.slice(0,7);
+const mLabel=k=>{const [y,m]=k.split('-');return HEB_M[+m-1]+' '+y};
+const months=[...new Set(M.map(m=>monthKey(m.d)))].sort();
+const lastMsg=M[M.length-1];
+const EMO=/\p{Extended_Pictographic}/gu;
+const PUNCT=/[.,!?;:'"\u05f3\u05f4()\[\]{}\u2026\u201c\u201d\u2018\u2019\u00ab\u00bb]/g;
+const WORD=/[\u05d0-\u05ea\u0591-\u05c7\ufb1d-\ufb4f]+|[A-Za-z\u00c0-\u024f]+|[0-9]+|[^\P{L}A-Za-z\u00c0-\u024f\u05d0-\u05ea]+/gu;
+const countWords=s=>(s.replace(/https?:\/\/\S+/g,' ').replace(PUNCT,'').match(WORD)||[]);
+let state={month:months[months.length-1],bsort:'left'};
+try{const s=localStorage.getItem('kings-month');if(s&&(s==='all'||months.includes(s)))state.month=s}catch(e){}
+const inScope=m=>state.month==='all'||monthKey(m.d)===state.month;
+const scope=()=>M.filter(inScope);
+const scopeLabel=()=>state.month==='all'?'מאז שהקבוצה התחילה':'ב'+mLabel(state.month);
+
+function agg(list,sc=state.month){
+  const a=P.map((n,i)=>({i,n,w:0,tw:0,c:0,media:0,del:0,poll:0,emo:0,q:0,night:0,morning:0,text:0,long:null}));
+  for(const m of list){const o=a[m.p];o.c++;o.w+=m.w;if(m.k!=='m')o.tw+=m.w;
+    if(m.k==='m')o.media++; else if(m.k==='x')o.del++; else{ if(m.k==='p')o.poll++; o.text++;
+      o.emo+=m.e; o.q+=m.q;
+      if(!o.long||m.w>o.long.w)o.long=m;}
+    const h=Math.floor(m.t/60); if(h<5)o.night++; else if(h<8)o.morning++;}
+  for(const o of a){const n=freeImgs(o.i,sc);if(n){o.media-=n;o.c-=n;o.w-=20*n;o.free=n}}
+  return a;
+}
+const active=()=>P.map((n,i)=>i).filter(i=>P[i]!=='לא מזוהה');
+
+/* month pills */
+function renderPills(){
+  const opts=[...months.map(k=>[k,HEB_M[+k.split('-')[1]-1]]),['all','כל הזמן']];
+  $('months').innerHTML=opts.map(([k,l])=>`<button class="pill" aria-pressed="${state.month===k}" data-k="${k}">${l}</button>`).join('');
+}
+$('months').onclick=e=>{const b=e.target.closest('button');if(!b)return;state.month=b.dataset.k;try{localStorage.setItem('kings-month',state.month)}catch(e){}renderAll()};
+
+function renderStats(list,a){
+  const words=a.reduce((s,o)=>s+o.w,0), act=a.filter(o=>o.c>0).length;
+  const days=new Set(list.map(m=>m.d)).size||1;
+  const top=[...a].sort((x,y)=>y.w-x.w)[0];
+  $('stats').innerHTML=[
+    [fmt(words),'מילים '+scopeLabel()],
+    [fmt(a.reduce((s,o)=>s+o.c,0)),'הודעות'],
+    [act,'משתתפים שכתבו'],
+    [fmt(Math.round(words/days)),'מילים ביום בממוצע'],
+    [top&&top.w?esc(top.n):'—','הכי הרבה מילים'],
+  ].map(([b,s])=>`<div class="stat"><b>${b}</b><span>${s}</span></div>`).join('');
+}
+
+function renderBudget(a){
+  const isAll=state.month==='all';
+  $('budget').hidden=isAll;$('matrix').hidden=!isAll;$('bsort').hidden=isAll;
+  document.querySelector('#budget-sec .legend').hidden=isAll;
+  if(isAll){
+    $('budget-h').textContent='תקציב לפי חודשים';
+    $('budget-p').textContent='כמה מילים נשארו לכל אחד בכל חודש, מתוך 500. אדום אומר שחרג.';
+    const per={};months.forEach(k=>per[k]=agg(M.filter(m=>monthKey(m.d)===k),k));
+    const ids=active().sort((x,y)=>a[y].w-a[x].w);
+    const cellBg=left=>left<0?'var(--danger-soft)':`color-mix(in srgb,var(--royal-soft) ${Math.round(100-left/5)}%,transparent)`;
+    $('matrix').innerHTML=`<table><thead><tr><th>משתתף</th>${months.map(k=>`<th class="num">${mLabel(k)}</th>`).join('')}<th class="num">סה״כ מילים</th></tr></thead><tbody>${
+      ids.map(i=>`<tr><td><span class="who" data-p="${i}" style="cursor:pointer">${esc(P[i])}</span></td>${months.map(k=>{const left=BUDGET-per[k][i].w;return `<td class="num"><span class="cell" style="background:${cellBg(left)};${left<0?'color:var(--danger);font-weight:600':''}">${left}</span></td>`}).join('')}<td class="num"><b>${fmt(a[i].w)}</b></td></tr>`).join('')}</tbody></table>`;
+    return;
+  }
+  $('budget-h').textContent='תקציב המילים של '+mLabel(state.month);
+  const cur=state.month===monthKey(lastMsg.d);
+  $('budget-p').textContent=`לכל אחד יש 500 מילים בחודש. ${cur?'נכון ל-'+dd(lastMsg.d)+' בשעה '+hm(lastMsg.t)+'.':'החודש הזה כבר נסגר.'}`;
+  let rows=active().map(i=>({i,n:P[i],used:a[i].w,left:BUDGET-a[i].w,fr:a[i].free||0}));
+  rows.sort(state.bsort==='name'?(x,y)=>x.n.localeCompare(y.n,'he'):(x,y)=>x.left-y.left||x.n.localeCompare(y.n,'he'));
+  $('budget').innerHTML=rows.map(r=>{
+    const over=r.left<0, pct=Math.max(0,Math.min(100,r.left/BUDGET*100));
+    const chip=over?`<span class="chip bad">חרג ב-${-r.left}</span>`:r.left<100?'<span class="chip warn">כמעט נגמר</span>':'';
+    return `<div class="brow${over?' over':''}" data-p="${r.i}" title="${esc(r.n)}: נוצלו ${r.used}, נשארו ${r.left}">
+      <span class="bname">${esc(r.n)}</span>
+      <div class="track"><div class="fill" style="width:${over?100:pct}%"></div></div>
+      <span class="bval"><b>${r.left}</b> <span class="muted">נשארו</span>${chip}${r.fr?`<span class="chip warn" title="${r.fr} תמונות של הגרף לא נספרו">+${r.fr*20}</span>`:''}</span></div>`}).join('');
+}
+$('bsort').onclick=e=>{const b=e.target.closest('button');if(!b)return;state.bsort=b.dataset.k;[...$('bsort').children].forEach(x=>x.setAttribute('aria-pressed',x===b));renderBudget(agg(scope()))};
+
+function renderAwards(a,list){
+  const best=(f,min=1,low=false)=>{let r=null;for(const o of a){if(o.n==='לא מזוהה')continue;const v=f(o);if(v==null||v<min&&!low)continue;if(!r||(low?v<r.v:v>r.v))r={o,v}}return r};
+  const longest=list.filter(m=>m.k!=='m'&&m.k!=='x').sort((x,y)=>y.w-x.w)[0];
+  const terse=best(o=>o.text>=8?o.tw/o.text:null,0,true);
+  const items=[
+    ['👑','מלך המילים',best(o=>o.w),v=>`${fmt(v)} מילים`],
+    ['📜','החפרן',longest?{o:a[longest.p],v:longest.w}:null,v=>`הודעה אחת של ${v} מילים`],
+    ['⚡','מכונת הודעות',best(o=>o.c),v=>`${v} הודעות`],
+    ['🦉','ינשוף הלילה',best(o=>o.night),v=>`${v} הודעות בין 00:00 ל-05:00`],
+    ['🌅','ציפור בוקר',best(o=>o.morning),v=>`${v} הודעות בין 05:00 ל-08:00`],
+    ['🎯','הכי תמציתי',terse,v=>`${v.toFixed(1)} מילים להודעה בממוצע`],
+    ['📸','צלם החצר',best(o=>o.media),v=>`${v} תמונות וקבצים`],
+    ['😂','אמן האימוג׳ים',best(o=>o.emo),v=>`${v} אימוג׳ים`],
+    ['❓','השאלן',best(o=>o.q),v=>`${v} הודעות שנגמרות בסימן שאלה`],
+    ['🗑️','המתחרט',best(o=>o.del),v=>`מחק ${v} הודעות`],
+    ['📊','הסוקר',best(o=>o.poll),v=>`${v} סקרים`],
+  ];
+  $('awards').innerHTML=items.map(([ic,t,r,why])=>`<div class="award"><div class="ic" aria-hidden="true">${ic}</div><div class="t">${t}</div>${r?`<div class="w who" data-p="${r.o.i}" style="cursor:pointer">${esc(r.o.n)}</div><div class="why">${why(r.v)}</div>`:'<div class="w muted">אין זוכה</div><div class="why muted">אף אחד לא התחרה</div>'}</div>`).join('');
+}
+
+function msgHTML(m,rank){
+  return `<div class="lrow">${rank?`<span class="rk">${rank}</span>`:''}<span class="who" data-p="${m.p}">${esc(P[m.p])}</span><span class="muted small">${dd(m.d)} · ${hm(m.t)}${m.k==='p'?' · סקר':''}</span><span class="wc">${m.w} מילים</span></div>`;
+}
+document.addEventListener('click',e=>{
+  const w=e.target.closest('[data-p]');if(w){$('psel').value=w.dataset.p;renderProfile();$('profile-sec').scrollIntoView({behavior:'smooth',block:'start'})}
+});
+
+function renderLongest(list){
+  const top=list.filter(m=>m.k==='t'||m.k==='p').sort((x,y)=>y.w-x.w).slice(0,10);
+  $('longest').innerHTML=top.length?top.map((m,i)=>msgHTML(m,i+1)).join(''):'<p class="empty">אין הודעות בתקופה הזו.</p>';
+}
+
+function renderHeat(list){
+  const g=Array.from({length:7},()=>Array(24).fill(0));
+  for(const m of list){const dow=new Date(m.d+'T12:00').getDay();g[dow][Math.floor(m.t/60)]+=m.w}
+  const max=Math.max(1,...g.flat());
+  let h='<div></div>'+Array.from({length:24},(_,i)=>`<div class="hl">${i%3===0?i:''}</div>`).join('');
+  g.forEach((row,d)=>{h+=`<div class="lab">${DAYS[d]}</div>`+row.map((v,i)=>`<div title="יום ${DAYS[d]} ${i}:00 · ${v} מילים" style="background:${v?`color-mix(in srgb,var(--royal) ${Math.round(12+88*Math.sqrt(v/max))}%,var(--sunk))`:'var(--sunk)'}"></div>`).join('')});
+  $('heat').innerHTML=h;
+}
+
+function renderTimeline(list){
+  const by={};for(const m of list)by[m.d]=(by[m.d]||0)+m.w;
+  let days=[];
+  if(list.length){const s=new Date(list[0].d+'T12:00'),e=new Date(list[list.length-1].d+'T12:00');for(let d=new Date(s);d<=e;d.setDate(d.getDate()+1))days.push(d.toISOString().slice(0,10))}
+  const W=520,H=190,pl=34,pb=22,pt=10,max=Math.max(10,...days.map(d=>by[d]||0));
+  const step=Math.pow(10,Math.floor(Math.log10(max)));const tick=max/step>5?step*2:step;
+  const bw=(W-pl-6)/Math.max(1,days.length);
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  for(let v=0;v<=max;v+=tick){const y=H-pb-(v/max)*(H-pb-pt);s+=`<line x1="${pl}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${pl-6}" y="${y+3}" text-anchor="end">${v}</text>`}
+  const topDay=days.reduce((a,d)=>(by[d]||0)>(by[a]||0)?d:a,days[0]);
+  days.forEach((d,i)=>{const v=by[d]||0,hgt=(v/max)*(H-pb-pt),x=W-6-(i+1)*bw;  // RTL: earliest on the right
+    s+=`<rect x="${x+bw*.15}" y="${H-pb-hgt}" width="${Math.max(1,bw*.7)}" height="${hgt}" rx="1.5" fill="${d===topDay?'var(--gold-bar)':'var(--royal)'}"><title>${dd(d)}: ${v} מילים</title></rect>`;
+    if(days.length<=40?i%7===0:i%14===0)s+=`<text x="${x+bw/2}" y="${H-6}" text-anchor="middle">${dd(d).slice(0,-3)}</text>`});
+  s+='</svg>';
+  const svg=$('timeline');svg.outerHTML=s.replace('<svg','<svg class="timeline" id="timeline" role="img" aria-label="מילים לפי יום"');
+  $('tl-cap').textContent=topDay&&by[topDay]?`מילים בכל יום, מימין לשמאל. היום הכי עמוס: ${dd(topDay)} עם ${by[topDay]} מילים (מסומן בזהב).`:'';
+}
+
+const tops=()=>TOPS[state.month]||{w:[],e:[],pw:{},pe:{}};
+function renderWords(list){
+  let tw=tops().w;const tw2=tw.filter(x=>x[1]>1);if(tw2.length>=12)tw=tw2;const max=tw[0]?tw[0][1]:1;
+  $('cloud').innerHTML=tw.length?tw.map(([w,c])=>`<span data-w="${esc(w)}" title="${c} פעמים" style="font-size:${(max>1?.85+(innerWidth<760?.75:1.3)*Math.sqrt((c-1)/(max-1)):1).toFixed(2)}rem;font-weight:${c/max>.6&&c>1?600:400};color:${c/max>.6&&c>1?'var(--royal)':'var(--ink)'}">${esc(w)}</span>`).join(''):'<p class="empty">אין מילים בתקופה הזו.</p>';
+  const te=tops().e;
+  $('emo').innerHTML=te.length?te.map(([e,c])=>`<span>${e}<small>${c}</small></span>`).join(''):'<p class="empty">אין אימוג׳ים.</p>';
+}
+
+function fillSelects(){
+  const ids=active().sort((x,y)=>P[x].localeCompare(P[y],'he'));
+  const o=ids.map(i=>`<option value="${i}">${esc(P[i])}</option>`).join('');
+  $('psel').innerHTML=o;$('va').innerHTML=o;$('vb').innerHTML=o;
+  const tot=agg(M,'all').sort((a,b)=>b.w-a.w);
+  $('psel').value=tot[0].i;$('va').value=tot[0].i;$('vb').value=tot[1].i;
+}
+
+function renderProfile(){
+  const i=+$('psel').value, mine=scope().filter(m=>m.p===i), all=M.filter(m=>m.p===i);
+  const a=agg(scope());const o=a[i];
+  const rank=[...a].sort((x,y)=>y.w-x.w).findIndex(x=>x.i===i)+1;
+  const hours=Array(24).fill(0);mine.forEach(m=>hours[Math.floor(m.t/60)]++);
+  const hmax=Math.max(1,...hours), peak=hours.indexOf(Math.max(...hours));
+  const tw=tops().pw[i]||[], te=tops().pe[i]||[];
+  const perMonth=months.map(k=>({k,w:all.filter(m=>monthKey(m.d)===k).reduce((s,m)=>s+m.w,0)-20*freeImgs(i,k)}));
+  const first=all[0];
+  const avg=o.text?(o.tw/o.text).toFixed(1):'0';
+  $('prof').innerHTML=`
+   <div class="ptop"><div class="avatar" aria-hidden="true">${esc([...P[i]][0])}</div><div><h3>${esc(P[i])}</h3><p class="muted small">מקום ${rank} במילים ${scopeLabel()}${first?` · הודעה ראשונה ב-${dd(first.d)}`:''}</p></div></div>
+   <div class="minis">
+     <div class="mini"><b>${fmt(o.w)}</b><span>מילים</span></div>
+     <div class="mini"><b>${o.c}</b><span>הודעות</span></div>
+     <div class="mini"><b>${avg}</b><span>מילים להודעה</span></div>
+     <div class="mini"><b>${o.media}</b><span>תמונות וקבצים</span></div>
+     <div class="mini"><b>${o.emo}</b><span>אימוג׳ים</span></div>
+     <div class="mini"><b>${mine.length?String(peak).padStart(2,'0')+':00':'—'}</b><span>השעה הכי פעילה</span></div>
+   </div>
+   <div class="grid2">
+     <div><h3 style="margin-bottom:8px">תקציב בכל חודש</h3><div class="budget">${perMonth.map(r=>{const left=BUDGET-r.w,over=left<0;return `<div class="brow${over?' over':''}" style="cursor:default"><span class="bname">${HEB_M[+r.k.split('-')[1]-1]}</span><div class="track"><div class="fill" style="width:${over?100:left/BUDGET*100}%"></div></div><span class="bval"><b>${left}</b> <span class="muted">נשארו</span></span></div>`}).join('')}</div></div>
+     <div><h3 style="margin-bottom:8px">הודעות לפי שעה</h3><div class="hours">${hours.map((v,h)=>`<div title="${h}:00 · ${v} הודעות" style="height:${v/hmax*100}%"></div>`).join('')}</div><div class="hours-l"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div></div>
+   </div>
+   <div><h3 style="margin-bottom:8px">המילים שלו</h3><div class="cloud">${tw.length?tw.map(([w,c])=>`<span title="${c} פעמים" style="font-size:${(.9+.8*c/tw[0][1]).toFixed(2)}rem">${esc(w)}</span>`).join(''):'<span class="muted">אין מילים בתקופה הזו</span>'}</div>
+   ${te.length?`<div class="emo" style="margin-top:10px">${te.map(([e,c])=>`<span>${e}<small>${c}</small></span>`).join('')}</div>`:''}</div>
+   <div><h3 style="margin-bottom:8px">ההודעה הכי ארוכה שלו</h3>${o.long?`<div class="msgs">${msgHTML(o.long)}</div>`:'<p class="empty">אין הודעות טקסט בתקופה הזו.</p>'}</div>`;
+}
+$('psel').onchange=renderProfile;
+
+function renderVs(){
+  const a=agg(scope()),x=a[+$('va').value],y=a[+$('vb').value];
+  const rows=[['מילים',o=>o.w],['הודעות',o=>o.c],['מילים להודעה',o=>o.text?+(o.tw/o.text).toFixed(1):0],['ההודעה הכי ארוכה',o=>o.long?o.long.w:0],['תמונות וקבצים',o=>o.media],['אימוג׳ים',o=>o.emo],['הודעות לילה',o=>o.night],['סימני שאלה',o=>o.q]];
+  if(state.month!=='all')rows.splice(1,0,['נשאר מה-500',o=>BUDGET-o.w]);
+  let score=[0,0];
+  const body=rows.map(([l,f])=>{const u=f(x),v=f(y),mx=Math.max(1,Math.abs(u),Math.abs(v));if(u>v)score[0]++;else if(v>u)score[1]++;
+    return `<div class="vrow"><div class="l"><div class="vb" style="width:${Math.max(0,u)/mx*100}%"></div><span class="${u>v?'win':''}">${u}</span></div><div class="lab">${l}</div><div class="r"><div class="vb" style="width:${Math.max(0,v)/mx*100}%"></div><span class="${v>u?'win':''}">${v}</span></div></div>`}).join('');
+  $('vs').innerHTML=`<div class="vrow" style="font-size:1rem"><div class="l"><b style="color:var(--royal)">${esc(x.n)}</b></div><div class="lab">${score[0]} : ${score[1]}</div><div class="r"><b style="color:var(--gold)">${esc(y.n)}</b></div></div>`+body;
+}
+$('va').onchange=$('vb').onchange=renderVs;
+
+function renderCalc(){
+  const w=countWords($('calc').value);
+  $('calc-n').textContent=w.length;
+  $('calc-t').innerHTML=w.slice(0,200).map(x=>`<span>${esc(x)}</span>`).join('');
+}
+$('calc').oninput=renderCalc;
+
+function renderAll(){
+  renderPills();
+  const list=scope(),a=agg(list);
+  renderStats(list,a);renderBudget(a);renderAwards(a,list);renderLongest(list);renderHeat(list);renderTimeline(list);renderWords(list);renderProfile();renderVs();renderCalc();
+  $('awards-p').textContent='מי זכה במה '+scopeLabel()+'.';
+}
+(function nav(){
+  const tabs=[...document.querySelectorAll('#tabs a')], sheet=$('sheet');
+  const go=id=>{const el=$(id);if(el)el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'})};
+  $('tabs').addEventListener('click',e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();
+    if(a.dataset.s==='more'){sheet.hidden=!sheet.hidden;return}sheet.hidden=true;go(a.dataset.s)});
+  sheet.addEventListener('click',e=>{const a=e.target.closest('a');e.preventDefault();sheet.hidden=true;if(a)go(a.getAttribute('href').slice(1))});
+  const more=['long-sec','time-sec','words-sec','calc-sec'];
+  const io=new IntersectionObserver(es=>{for(const en of es){if(!en.isIntersecting)continue;const id=en.target.id;
+    tabs.forEach(t=>t.classList.toggle('on',t.dataset.s===id||(t.dataset.s==='more'&&more.includes(id))))}},{rootMargin:'-45% 0px -50% 0px'});
+  document.querySelectorAll('section.card[id]').forEach(s=>io.observe(s));
+})();
+fillSelects();
+$('asof').textContent=`הנתונים מעודכנים עד ההודעה האחרונה בייצוא: ${dd(lastMsg.d)} בשעה ${hm(lastMsg.t)}.`;
+renderAll();
+})();
+</script>
+</body>
+</html>
